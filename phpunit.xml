@@ -12,6 +12,16 @@
             <directory>tests/Feature</directory>
         </testsuite>
     </testsuites>
+    <testsuites>
+        <testsuite name="Unit">
+            <directory>tests/Unit</directory>
+            <directory>Modules/*/Tests/Unit</directory>  <!-- ← add this -->
+        </testsuite>
+        <testsuite name="Feature">
+            <directory>tests/Feature</directory>
+            <directory>Modules/*/Tests/Feature</directory>  <!-- ← add this -->
+        </testsuite>
+    </testsuites>
     <source>
         <include>
             <directory>app</directory>
