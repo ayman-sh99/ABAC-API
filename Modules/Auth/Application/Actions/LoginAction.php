@@ -8,12 +8,14 @@ use Modules\Auth\Domain\Contracts\TokenServiceContract;
 use Modules\Auth\Domain\Contracts\UserRepositoryContract;
 use Modules\Auth\Domain\Exceptions\InvalidCredentialsException;
 use Modules\Auth\Domain\ValueObjects\Email;
+use Modules\Authorization\Domain\Contracts\RoleRepositoryContract;
+use Modules\Authorization\Domain\Entities\Permission;
 
 final class LoginAction
 {
     public function __construct(
         private readonly UserRepositoryContract $userRepository,
-        // private readonly RoleRepositoryContract $roleRepository,
+         private readonly RoleRepositoryContract $roleRepository,
         private readonly TokenServiceContract $tokenService,
     ) {}
 
@@ -30,10 +32,7 @@ final class LoginAction
         $user->login($input->password);
 
         // 3. Load Roles + Permissions From Authorization Module via it's contract
-
-        // Fix:
-        // $role = $this->roleRepository->findByUserId($user->id());
-        $role = 'guest'; // Fix
+         $role = $this->roleRepository->findByUserId($user->id());
 
         if ($role) {
             $user->assignRole($role);
@@ -48,15 +47,11 @@ final class LoginAction
             email: $user->email()->value(),
             token: $token->plainText(),
             tokenType: 'Bearer',
-            // Fix
-            // roleName: $role?->name()->value() ?? 'guest',
-            roleName: 'guest',
-            // Fix:
-//            permissions: array_map(
-//                fn(Permission $p) => $p->name(),
-//                ?role?->permissions() ?? []
-//            )
-            permissions: [] // Fix
+            roleName: $role?->name() ?? 'guest',
+            permissions: array_map(
+                fn(Permission $p) => $p->name(),
+                $role?->permissions() ?? []
+            ),
         );
     }
 }

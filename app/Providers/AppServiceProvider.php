@@ -20,5 +20,6 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->app->register('Modules\Auth\Providers\AuthServiceProvider');
+        $this->app->register('Modules\Authorization\Providers\authorizationServiceProvider');
     }
 }
