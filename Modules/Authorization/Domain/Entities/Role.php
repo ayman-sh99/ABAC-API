@@ -2,6 +2,8 @@
 
 namespace Modules\Authorization\Domain\Entities;
 
+use Modules\Authorization\Domain\ValueObjects\RoleId;
+
 final class Role
 {
     /**
