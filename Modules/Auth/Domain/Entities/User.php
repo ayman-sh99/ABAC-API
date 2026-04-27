@@ -2,13 +2,12 @@
 
 namespace Modules\Auth\Domain\Entities;
 
-use AllowDynamicProperties;
+use Modules\Auth\Domain\Exceptions\EmailNotVerifiedException;
 use Modules\Auth\Domain\Exceptions\InvalidCredentialsException;
 use Modules\Auth\Domain\Exceptions\UserNotActiveException;
 use Modules\Auth\Domain\ValueObjects\Email;
 use Modules\Auth\Domain\ValueObjects\HashedPassword;
 use Modules\Authorization\Domain\Entities\Role;
-use Modules\Shared\Domain\Exceptions\EmailNotVerifiedException;
 use Modules\Shared\Domain\ValueObjects\UserId;
 
 final class User

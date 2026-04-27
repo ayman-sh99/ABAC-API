@@ -15,9 +15,24 @@ final class Role
         private array $permissions,
     ) {}
 
+
     public function hasPermission(string $permission): bool
     {
         return in_array($permission, $this->permissions);
+    }
+
+    /**
+     * Retrieve the full Permission entity (including conditions).
+     * Used by the PolicyEngine for ABAC evaluation.
+     */
+    public function findPermission(string $permissionName): ?Permission
+    {
+        foreach ($this->permissions as $permission) {
+            if ($permission->name() === $permissionName) {
+                return $permission;
+            }
+        }
+        return null;
     }
 
     // Getters

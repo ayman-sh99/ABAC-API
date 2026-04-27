@@ -10,23 +10,42 @@ class RolesAndPermissionsSeeder extends Seeder
 {
     public function run(): void
     {
-        // Create permissions
-        $permissions = collect([
-            ['name' => 'users.view',    'group' => 'users'],
-            ['name' => 'users.manage',  'group' => 'users'],
-        ])->map(fn($p) => PermissionModel::firstOrCreate(['name' => $p['name']], $p));
+        // --- Permissions ---
+        $permissionsData = [
+            ['name' => 'posts:view',   'group' => 'posts'],
+            ['name' => 'posts:create', 'group' => 'posts'],
+            ['name' => 'posts:edit',   'group' => 'posts'],
+            ['name' => 'posts:delete', 'group' => 'posts'],
+            ['name' => 'users:view',   'group' => 'users'],
+            ['name' => 'users:manage', 'group' => 'users'],
+        ];
 
-        // Create roles and attach permissions
-        $admin = RoleModel::firstOrCreate(['name' => 'admin'], [
-            'display_name' => 'Administrator',
-        ]);
-        $admin->permissions()->sync($permissions->pluck('id'));
+        $permissions = collect($permissionsData)
+            ->map(fn($p) => PermissionModel::firstOrCreate(['name' => $p['name']], $p));
 
-        $editor = RoleModel::firstOrCreate(['name' => 'editor'], [
-            'display_name' => 'Editor',
-        ]);
-        $editor->permissions()->sync(
-            $permissions->whereIn('name', ['users.view'])->pluck('id')
+        $byName = $permissions->keyBy('name');
+
+        // --- Admin role: all permissions, no conditions ---
+        $admin = RoleModel::firstOrCreate(['name' => 'admin'], ['display_name' => 'Administrator']);
+        $admin->permissions()->sync(
+            $permissions->mapWithKeys(fn($p) => [$p->id => ['conditions' => null]])->toArray()
         );
+
+        // --- Editor role: can view all posts, but can only edit/delete their OWN posts ---
+        $editor = RoleModel::firstOrCreate(['name' => 'editor'], ['display_name' => 'Editor']);
+        $editor->permissions()->sync([
+            $byName['posts:view']->id   => ['conditions' => null],
+            $byName['posts:create']->id => ['conditions' => null],
+            $byName['posts:edit']->id   => ['conditions' => json_encode(['owner_only' => true])],
+            $byName['posts:delete']->id => ['conditions' => json_encode(['owner_only' => true])],
+        ]);
+
+        // --- Viewer role: read-only, only published posts ---
+        $viewer = RoleModel::firstOrCreate(['name' => 'viewer'], ['display_name' => 'Viewer']);
+        $viewer->permissions()->sync([
+            $byName['posts:view']->id => [
+                'conditions' => json_encode(['allowed_statuses' => ['published']]),
+            ],
+        ]);
     }
 }

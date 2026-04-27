@@ -22,6 +22,8 @@ class RoleModel extends Model
 
     public function permissions(): BelongsToMany
     {
-        return $this->belongsToMany(PermissionModel::class, 'role_permissions', 'role_id', 'permission_id');
+        return $this->belongsToMany(PermissionModel::class, 'role_permissions', 'role_id', 'permission_id')
+            ->using(RolePermissionPivot::class)
+            ->withPivot('conditions');  // ← load conditions from pivot
     }
 }
