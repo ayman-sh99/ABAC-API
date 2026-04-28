@@ -13,6 +13,7 @@ use Modules\Authorization\Domain\ValueObjects\ResourceAttributes;
 use Modules\Authorization\Infrastructure\Repositories\EloquentPermissionRepository;
 use Modules\Authorization\Infrastructure\Repositories\EloquentRoleRepository;
 use Modules\Authorization\Presentation\Middleware\AbacMiddleware;
+use Modules\Authorization\Presentation\Middleware\FieldGuardMiddleware;
 
 class AuthorizationServiceProvider extends ServiceProvider
 {
@@ -34,6 +35,7 @@ class AuthorizationServiceProvider extends ServiceProvider
 
         // Register middleware alias so routes can use ->middleware('abac:posts:edit')
         $this->app['router']->aliasMiddleware('abac', AbacMiddleware::class);
+        $this->app['router']->aliasMiddleware('field.guard',  FieldGuardMiddleware::class);
 
         // Fix: for testing only
         $this->loadRoutesFrom(__DIR__ . '/../Presentation/Routes/api.php');

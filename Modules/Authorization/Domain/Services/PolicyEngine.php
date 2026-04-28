@@ -5,6 +5,7 @@ namespace Modules\Authorization\Domain\Services;
 use Modules\Authorization\Domain\Contracts\PolicyEngineContract;
 use Modules\Authorization\Domain\Contracts\RoleRepositoryContract;
 use Modules\Authorization\Domain\Entities\Permission;
+use Modules\Authorization\Domain\ValueObjects\FieldPermissions;
 use Modules\Authorization\Domain\ValueObjects\ResourceAttributes;
 use Modules\Shared\Domain\ValueObjects\UserId;
 
@@ -70,5 +71,22 @@ final class PolicyEngine implements PolicyEngineContract
         // Each condition must be self-contained and easy to unit-test.
 
         return true;
+    }
+
+    public function resolveFieldPermissions(UserId $userId, string $permissionName): FieldPermissions
+    {
+        $role = $this->roleRepository->findByUserId($userId);
+
+        if (! $role) {
+            return FieldPermissions::none();
+        }
+
+        $permission = $role->findPermission($permissionName);
+
+        if (! $permission) {
+            return FieldPermissions::none();
+        }
+
+        return FieldPermissions::fromConditions($permission->conditions());
     }
 }
